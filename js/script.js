@@ -1,6 +1,8 @@
 const profileInformation = document.querySelector(".overview");
 const username = "vjards";
 const repoList = document.querySelector(".repo-list");
+const repos = document.querySelector(".repos");
+const repoDatabase = document.querySelector(".repo-data")
 
 //FETCHING GITHUB PROFILE
 const gitHubProfile = async function(){
@@ -53,3 +55,47 @@ const repoInfo = function(repos){
     }
 };
 
+//CLICK EVENT FOR REPO BUTTONS
+repoList.addEventListener("click",function(e){
+  if (e.target.matches("h3")){
+    const repoName = e.target.innerText;
+    getRepoInfo(repoName);
+  }
+});
+
+//FETCH SPECIFIC REPO INFORMATION
+const getRepoInfo = async function(repoName){
+  const fetchRepoInfo = await fetch(`https://api.github.com/repos/${username}/${repoName}`);
+  const repoStatus = await fetchRepoInfo.json();
+  console.log(repoStatus);
+
+  //FETCH LANGAUGE DATA
+  const fetchLanguages = await fetch ('https://api.github.com/repos/vjards/mood-ring-app/languages');
+  const languageData = await fetchLanguages.json();
+  console.log(languageData);
+
+  //LANGUAGES ARRAY
+  const languages =[];
+  for(const language in languageData){
+   languages.push(language);
+  }
+  console.log(languages)
+
+  displayRepoInfo(repoStatus, languages);
+};
+
+const displayRepoInfo = function(repoStatus, languages){
+  repoDatabase.innerHTML ="";
+  const div = document.createElement("div");
+  div.innerHTML =`
+  <h3>Name: ${repoStatus.name}</h3>
+    <p>Description: ${repoStatus.description}</p>
+    <p>Default Branch: ${repoStatus.default_branch}</p>
+    <p>Languages: ${languages.join(", ")}</p>
+    <a class="visit" href="${repoStatus.html_url}" target="_blank" rel="noreferrer noopener">View Repo on GitHub!</a>
+  `
+
+  repoDatabase.append(div);
+  repoDatabase.classList.remove("hide");
+  repos.classList.add("hide");
+};
