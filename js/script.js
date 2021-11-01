@@ -1,8 +1,10 @@
 const profileInformation = document.querySelector(".overview");
 const username = "vjards";
 const repoList = document.querySelector(".repo-list");
-const repos = document.querySelector(".repos");
+const reposContainer = document.querySelector(".repos");
 const repoDatabase = document.querySelector(".repo-data")
+const repoGalleryButton = document.querySelector(".view-repos");
+const filterInput = document.querySelector(".filter-repos");
 
 //FETCHING GITHUB PROFILE
 const gitHubProfile = async function(){
@@ -34,11 +36,11 @@ const displayUserInfo = function(data){
    `;
    profileInformation.append(div);
    //FETCHING GITHUBS REPO FUNCTION CALLBACK
-   gitRepos();
+   gitRepos(username);
 };
 
 //FETCHING GITHUB REPOS
-const gitRepos = async function(){
+const gitRepos = async function(username){
     const fetchRepos = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
     const repoData = await fetchRepos.json();
     //REPO INFO FUNCTION CALLBACK
@@ -47,6 +49,7 @@ const gitRepos = async function(){
 
 //REPO INFORMATION
 const repoInfo = function(repos){
+  filterInput.classList.remove("hide");
     for (const repo of repos) {
     const repoItem = document.createElement("li");
     repoItem.classList.add("repo");
@@ -67,25 +70,31 @@ repoList.addEventListener("click",function(e){
 const getRepoInfo = async function(repoName){
   const fetchRepoInfo = await fetch(`https://api.github.com/repos/${username}/${repoName}`);
   const repoStatus = await fetchRepoInfo.json();
-  console.log(repoStatus);
+  //console.log(repoStatus);
 
   //FETCH LANGAUGE DATA
-  const fetchLanguages = await fetch ('https://api.github.com/repos/vjards/mood-ring-app/languages');
+  const fetchLanguages = await fetch (repoStatus.languages_url);
   const languageData = await fetchLanguages.json();
-  console.log(languageData);
+  //console.log(languageData);
 
   //LANGUAGES ARRAY
   const languages =[];
   for(const language in languageData){
    languages.push(language);
   }
-  console.log(languages)
+  //console.log(languages)
 
   displayRepoInfo(repoStatus, languages);
 };
 
+// DISPLAY INDIVIDUAL REPO INFORMATION
 const displayRepoInfo = function(repoStatus, languages){
   repoDatabase.innerHTML ="";
+  repoDatabase.classList.remove("hide");
+  reposContainer.classList.add("hide");
+  repoGalleryButton.classList.remove("hide");
+
+  
   const div = document.createElement("div");
   div.innerHTML =`
   <h3>Name: ${repoStatus.name}</h3>
@@ -94,8 +103,30 @@ const displayRepoInfo = function(repoStatus, languages){
     <p>Languages: ${languages.join(", ")}</p>
     <a class="visit" href="${repoStatus.html_url}" target="_blank" rel="noreferrer noopener">View Repo on GitHub!</a>
   `
-
+  //repo-data class
   repoDatabase.append(div);
-  repoDatabase.classList.remove("hide");
-  repos.classList.add("hide");
+  
 };
+
+//CLICK EVENT FOR "BACK TO GALLERY" REPO BUTTON
+  repoGalleryButton.addEventListener("click", function(){
+  reposContainer.classList.remove("hide");
+  repoDatabase.classList.add("hide");
+  repoGalleryButton.classList.add("hide");
+});
+
+//DYNAMIC SEARCH BAR
+filterInput.addEventListener("input", function(e){
+  const searchText = e.target.value;
+  const repos = document.querySelectorAll(".repo");
+  const searchLowerText = searchText.toLowerCase();
+
+  for (const repo of repos){
+    const repoLowerText = repo.innerText.toLowerCase();
+    if(repoLowerText.includes(searchLowerText)){
+      repo.classList.remove("hide");
+    }else{
+      repo.classList.add("hide");
+    }
+  }
+});
