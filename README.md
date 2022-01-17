@@ -4,3 +4,4 @@ A website that displays a list of repos from my GitHub portfolio using GitHub’
 
 
 # How to Use
+![search for a repo](https://media.giphy.com/media/z29KNZuVlBnfPzoont/giphy.gif)
